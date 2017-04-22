@@ -79,6 +79,7 @@
     <script>
       'use strict'
 
+      // Store references to table elements
       var container = document.getElementById('table-container');
       var tbody = document.querySelector('#table-container tbody');
       var thead = document.querySelector('#table-container thead');
@@ -90,8 +91,9 @@
       container.style.overflow = 'auto';
       container.style.position = 'relative';
 
-      function setDimensions() {
-        // Reset styles
+      // Add inline styles to fix the header row and leftmost column
+      function updateTableStyles() {
+        // Reset styles so we resort to the default table layout algorithm
         tbody.style.display = '';
         tbody.style.width = '';
         tbody.style.marginTop = ''
@@ -117,8 +119,10 @@
           });
         });
 
-        // Get width and height of each th
-        // getBoundingClientRect()'s dimensions include paddings and borders
+        /**
+         * Get width and height of each th, which is set by the default table layout algorithm
+         * getBoundingClientRect()'s dimensions include paddings and borders
+         */
         var thStyles = [].slice.call(ths).map(function(th) {
           var rect = th.getBoundingClientRect();
           var style = document.defaultView.getComputedStyle(th, '');
@@ -139,7 +143,7 @@
 
         // Set widths of thead and tbody
         var tableWidth = thStyles.reduce(function(sum, cur) {
-          return sum + cur.boundingWidth
+          return sum + cur.boundingWidth;
         }, 0);
         tbody.style.display = 'block';
         tbody.style.width = tableWidth + 'px';
@@ -151,10 +155,10 @@
         thead.style.left = thStyles[0].boundingWidth + 'px';
         thead.style['z-index'] = 10;
 
-        // Position tbody
-        tbody.style.marginTop = thStyles[0].boundingHeight + 'px';
-
-        // Set position and widths th elements in thead, including the fixed th
+        /**
+         * Set widths of the th elements in thead
+         * For the fixed th, set its position
+         */
         ths.forEach(function(th, i) {
           th.style.width = thStyles[i].width + 'px';
           if (i === 0) {
@@ -164,7 +168,13 @@
           }
         });
 
-        // Set position and widths td elements in tbody, including the fixed td
+        // Set margin-top for tbody - the fixed header is displayed in this margin
+        tbody.style.marginTop = thStyles[0].boundingHeight + 'px';
+
+        /**
+         * Set widths of the td elements in tbody
+         * For the fixed td, set its position
+         */
         tbodyTrs.forEach(function(tr, i) {
           tr.style.display = 'block';
           tr.style.paddingLeft = thStyles[0].boundingWidth + 'px';
@@ -178,7 +188,7 @@
         });
       }
 
-      setDimensions();
+      updateTableStyles();
 
       // Resize listener to update table cell dimensions
       window.addEventListener('resize', resizeThrottler, false);
@@ -187,7 +197,7 @@
         if (!resizeTimeout) {
           resizeTimeout = setTimeout(function() {
             resizeTimeout = null;
-            setDimensions();
+            updateTableStyles();
           }, 500);
         }
       }
@@ -198,7 +208,7 @@
         var vTransform = 'translate3d(0,' + this.scrollTop + 'px,0)';
         thead.style.transform = vTransform;
 
-        // Fix first tr or td in each tr element
+        // Fix first th or td in each tr element
         var hTransform = 'translate3d(' + this.scrollLeft + 'px,0,0)';
         trs.forEach(function(tr, i) {
           var selector = i === 0 ? 'th' : 'td';
