@@ -7,4 +7,4 @@ A simple HTML and JS table with a fixed header row and a fixed leftmost column. 
 - When users resize the browser window, column widths are updated using the default HTML table layout algorithm.
 
 ## Limitations
-- Cell heights are incorrect when a row contains cells of varying heights. To avoid this, do not wrap cell content (e.g., by using the `white-space: nowrap !important;`).
+- Cell heights are incorrect when a row contains cells of varying heights. To avoid this, do not wrap cell content (e.g., by using the `white-space: nowrap !important;`). Avoid long content in the fixed column so that it doesn't overwhelm narrow viewports.
