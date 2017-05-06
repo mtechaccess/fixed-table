@@ -1,6 +1,5 @@
-function fixTable() {
+function fixTable(container) {
   // Store references to table elements
-  var container = document.getElementById('fixed-table-container');
   var thead = container.querySelector('thead');
   var tbody = container.querySelector('tbody');
 
@@ -9,9 +8,9 @@ function fixTable() {
   container.style.position = 'relative';
 
   // Add inline styles to fix the header row and leftmost column
-  function updateTableStyles() {
-    var ths = thead.querySelectorAll('th');
-    var tbodyTrs = tbody.querySelectorAll('tr')
+  function relayout() {
+    var ths = [].slice.call(thead.querySelectorAll('th'));
+    var tbodyTrs = [].slice.call(tbody.querySelectorAll('tr'));
 
     /**
      * Remove inline styles so we resort to the default table layout algorithm
@@ -33,18 +32,19 @@ function fixTable() {
     });
     tbodyTrs.forEach(function(tr) {
       tr.setAttribute('style', '');
-      tr.querySelectorAll('td').forEach(function(td) {
+    });
+    [].slice.call(tbody.querySelectorAll('td'))
+      .forEach(function(td) {
         td.style.width = '';
         td.style.position = '';
         td.style.left = '';
       });
-    });
 
     /**
      * Store width and height of each th
      * getBoundingClientRect()'s dimensions include paddings and borders
      */
-    var thStyles = [].slice.call(ths).map(function(th) {
+    var thStyles = ths.map(function(th) {
       var rect = th.getBoundingClientRect();
       var style = document.defaultView.getComputedStyle(th, '');
       return {
@@ -56,7 +56,9 @@ function fixTable() {
     });
 
     // Set widths of thead and tbody
-    var totalWidth = thStyles.reduce(function(sum, cur) { return sum + cur.boundingWidth; }, 0);
+    var totalWidth = thStyles.reduce(function(sum, cur) {
+      return sum + cur.boundingWidth;
+    }, 0);
     tbody.style.display = 'block';
     tbody.style.width = totalWidth + 'px';
     thead.style.width = totalWidth - thStyles[0].boundingWidth + 'px';
@@ -84,18 +86,19 @@ function fixTable() {
     tbodyTrs.forEach(function(tr, i) {
       tr.style.display = 'block';
       tr.style.paddingLeft = thStyles[0].boundingWidth + 'px';
-      tr.querySelectorAll('td').forEach(function(td, j) {
-        td.style.width = thStyles[j].width + 'px';
-        if (j === 0) {
-          td.style.position = 'absolute';
-          td.style.left = '0';
-        }
-      });
+      [].slice.call(tr.querySelectorAll('td'))
+        .forEach(function(td, j) {
+          td.style.width = thStyles[j].width + 'px';
+          if (j === 0) {
+            td.style.position = 'absolute';
+            td.style.left = '0';
+          }
+        });
     });
   }
 
   // Initialize table styles
-  updateTableStyles();
+  relayout();
 
   // Update table cell dimensions on resize
   window.addEventListener('resize', resizeThrottler, false);
@@ -104,7 +107,7 @@ function fixTable() {
     if (!resizeTimeout) {
       resizeTimeout = setTimeout(function() {
         resizeTimeout = null;
-        updateTableStyles();
+        relayout();
       }, 500);
     }
   }
@@ -114,8 +117,17 @@ function fixTable() {
     thead.style.transform = 'translate3d(0,' + this.scrollTop + 'px,0)';
     var hTransform = 'translate3d(' + this.scrollLeft + 'px,0,0)';
     thead.querySelector('th').style.transform = hTransform;
-    tbody.querySelectorAll('tr > td:first-child').forEach(function(td, i) {
-      td.style.transform = hTransform;
-    });
+    [].slice.call(tbody.querySelectorAll('tr > td:first-child'))
+      .forEach(function(td, i) {
+        td.style.transform = hTransform;
+      });
   });
+
+  /**
+   * Return an object that exposes the relayout function so that we can
+   * update the table when the number of columns or the content inside columns changes
+   */
+  return {
+    relayout: relayout
+  };
 }
