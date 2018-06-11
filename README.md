@@ -1,4 +1,7 @@
 # fixed-table
+
+**NB:** Based on [fixed table](https://github.com/kevkan/fixed-table) by [kevkan](https://github.com/kevkan)
+
 A simple HTML and JS table with a fixed header row and a fixed leftmost column. The approach is taken from [Fixed Tables JS](https://github.com/webcyou/fixed-table-js).
 
 ## Features
