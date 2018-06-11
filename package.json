@@ -1,6 +1,6 @@
 {
   "name": "@mtechaccess/fixed-table",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vanilla JS table with fixed header row and leftmost column",
   "main": "fixed-table.js",
   "scripts": {
